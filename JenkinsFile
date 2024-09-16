@@ -1,24 +1,49 @@
 pipeline {
-  agent {
+    agent any
     
-  }
-  stages {
-    stage('Checkout') {
-      steps {
-        echo 'Checkout Application'
-        //git branch: 'main', url: 'https://github.com/biradar-shantaveer/spring-boot-app.git'
-      }
+    tools {
+        jdk 'jdk11'
+        maven 'maven3'
     }
-    stage('Build and Test') {
-      steps {
-        echo 'Building Application'
-      }
+
+    environment {
+        SCANNER_HOME= tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('Git checkout') {
+            steps {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/biradar-shantaveer/spring-boot-app.git'
+            }
+        }
+        
+         stage('Compile') {
+            steps {
+                sh "mvn clean compile"
+            }
+        }
+        
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.url=http://192.168.1.2:9000/ \
+        //         -Dsonar.login=squ_c376600bccf890041d20b1cf04a3c2be82e0272d \
+        //         -Dsonar.projectName=spring-boot-app \
+        //         -Dsonar.java.binaries=. \
+        //         -Dsonar.projectKey=spring-boot-app '''
+
+        //     }
+        // }
+        
+        stage('Build Application') {
+            steps {
+                sh "mvn clean install"
+
+            }
+        }
     }
     
-    stage('Deploy') {
-     steps {
-        echo 'Deploying Application'
-      }
-    }
-  }
+    
+    
+        
+    
 }
